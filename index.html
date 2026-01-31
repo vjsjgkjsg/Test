@@ -1,192 +1,276 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>NeoBank</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ShadowBank | Simulator</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #007aff;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --bg: #000000;
+            --card: #1c1c1e;
+            --text: #ffffff;
+            --text-sec: #8e8e93;
+        }
 
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: radial-gradient(circle at top, #1a1f2b, #0b0f18);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: system-ui;
-  color: #fff;
-}
-.card {
-  width: 340px;
-  padding: 30px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(20px);
-  text-align: center;
-}
-button {
-  width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  border: none;
-  margin-top: 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-.primary {
-  background: linear-gradient(135deg,#4cff91,#00c6ff);
-  color: #000;
-  font-weight: 600;
-}
-.secondary {
-  background: rgba(255,255,255,0.12);
-  color: #fff;
-}
-.pin {
-  display: flex;
-  justify-content: space-between;
-  margin: 20px 0;
-}
-.dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.4);
-}
-.dot.filled {
-  background: #4cff91;
-  border-color: #4cff91;
-}
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 10px;
-}
-.keypad button {
-  height: 55px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  font-size: 18px;
-}
-</style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Manrope', sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+        .screen { 
+            position: fixed; inset: 0; display: none; 
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; z-index: 10;
+        }
+        .screen.active { display: flex; }
+
+        /* ИНТРО И СМС */
+        #sms-notification {
+            width: 100%; max-width: 350px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px; padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .sms-header { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--text-sec); margin-bottom: 8px; }
+        .sms-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+        .btn-box { display: flex; gap: 10px; width: 100%; max-width: 350px; margin-top: 25px; }
+        .btn { flex: 1; padding: 15px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; }
+        .btn-blue { background: var(--primary); color: #fff; }
+        .btn-dark { background: #2c2c2e; color: #fff; }
+
+        /* ТУТОРИАЛ */
+        #tutorial { text-align: center; animation: fadeIn 0.5s; }
+        #tutorial h2 { color: var(--primary); margin-bottom: 15px; }
+        #tutorial p { color: var(--text-sec); margin-bottom: 20px; line-height: 1.5; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ПИН-КОД */
+        .logo-box { width: 70px; height: 70px; background: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; }
+        .pin-dots { display: flex; gap: 15px; margin: 25px 0; }
+        .dot { width: 12px; height: 12px; border: 2px solid var(--text-sec); border-radius: 50%; }
+        .dot.filled { background: var(--text); border-color: var(--text); }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 250px; }
+        .numpad button { height: 60px; border-radius: 50%; border: none; background: #1c1c1e; color: #fff; font-size: 20px; font-weight: 600; }
+        .del-btn { background: transparent !important; color: var(--danger) !important; }
+
+        /* БАНК */
+        .app-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px; position: absolute; top: 0; }
+        .main-card { width: 100%; background: var(--card); border-radius: 25px; padding: 20px; margin-top: 60px; }
+        .balance-label { color: var(--text-sec); font-size: 14px; }
+        .balance-val { font-size: 32px; font-weight: 800; margin: 5px 0; }
+        
+        .risk-bar-bg { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        .risk-fill { width: 0%; height: 100%; background: var(--danger); transition: 0.3s; box-shadow: 0 0 10px var(--danger); }
+        
+        .action-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 16px; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        /* АНИМАЦИЯ ТРЯСКИ */
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+        .text-red { color: var(--danger) !important; }
+    </style>
 </head>
 <body>
 
-<div class="card" id="app"></div>
-
-<script>
-const app = document.getElementById("app");
-let pin = "";
-
-const hasPin = () => localStorage.getItem("pinHash");
-const hasBio = () => localStorage.getItem("biometric");
-
-async function sha(text) {
-  const enc = new TextEncoder().encode(text);
-  const buf = await crypto.subtle.digest("SHA-256", enc);
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-
-/* ---------- BIOMETRIC ---------- */
-async function registerBiometric() {
-  const publicKey = {
-    challenge: crypto.getRandomValues(new Uint8Array(32)),
-    rp: { name: "NeoBank" },
-    user: {
-      id: crypto.getRandomValues(new Uint8Array(16)),
-      name: "user",
-      displayName: "NeoBank User"
-    },
-    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-    authenticatorSelection: {
-      authenticatorAttachment: "platform",
-      userVerification: "required"
-    }
-  };
-  await navigator.credentials.create({ publicKey });
-  localStorage.setItem("biometric", "1");
-}
-
-async function biometricLogin() {
-  await navigator.credentials.get({
-    publicKey: {
-      challenge: crypto.getRandomValues(new Uint8Array(32)),
-      userVerification: "required"
-    }
-  });
-  dashboard();
-}
-
-/* ---------- PIN UI ---------- */
-function pinUI(onDone) {
-  pin = "";
-  app.innerHTML = `
-    <h2>Введите PIN</h2>
-    <div class="pin">${"<div class='dot'></div>".repeat(4)}</div>
-    <div class="keypad">
-      ${[1,2,3,4,5,6,7,8,9,"⌫",0,"C"].map(x=>`<button>${x}</button>`).join("")}
+    <div id="intro-screen" class="screen active">
+        <div id="sms-notification">
+            <div class="sms-header"><div class="sms-dot"></div><span>MESSAGES • СЕЙЧАС</span></div>
+            <b style="display:block; margin-bottom:5px;">Неизвестный номер</b>
+            <p style="font-size: 14px; line-height: 1.4;">Слушай, есть тема... Хочешь поднять кучу денег и стать реально богатым? 💸 Жду ответа.</p>
+        </div>
+        <div class="btn-box" id="intro-btns">
+            <button class="btn btn-dark" onclick="Intro.reject()">Нет...</button>
+            <button class="btn btn-blue" onclick="Intro.accept()">Да!</button>
+        </div>
+        <div id="tutorial" style="display:none;">
+            <h2>ТЫ В ДЕЛЕ</h2>
+            <p>Твоя задача: проворачивать схемы.<br>Скамь "мамонтов", получай кэш.<br>Но если <b>Розыск</b> дойдет до 100% — тебе конец.</p>
+            <button class="btn btn-blue" style="width:100%" onclick="Intro.start()">ПОГНАЛИ</button>
+        </div>
     </div>
-  `;
-  const dots = document.querySelectorAll(".dot");
-  document.querySelectorAll(".keypad button").forEach(b=>{
-    b.onclick = async ()=>{
-      if (b.textContent==="⌫") pin=pin.slice(0,-1);
-      else if (b.textContent==="C") pin="";
-      else if (pin.length<4) pin+=b.textContent;
 
-      dots.forEach((d,i)=>d.classList.toggle("filled",i<pin.length));
+    <div id="pin-screen" class="screen">
+        <div class="logo-box"><i class="fa-solid fa-user-secret"></i></div>
+        <p id="pin-status">Создайте код доступа</p>
+        <div class="pin-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <div class="numpad">
+            <button onclick="PinManager.num(1)">1</button><button onclick="PinManager.num(2)">2</button><button onclick="PinManager.num(3)">3</button>
+            <button onclick="PinManager.num(4)">4</button><button onclick="PinManager.num(5)">5</button><button onclick="PinManager.num(6)">6</button>
+            <button onclick="PinManager.num(7)">7</button><button onclick="PinManager.num(8)">8</button><button onclick="PinManager.num(9)">9</button>
+            <button onclick="PinManager.num(0)" style="grid-column: 2;">0</button>
+            <button class="del-btn" onclick="PinManager.del()"><i class="fa-solid fa-delete-left"></i></button>
+        </div>
+    </div>
 
-      if (pin.length===4) onDone(pin);
-    };
-  });
-}
+    <div id="app-screen" class="screen" style="justify-content: flex-start; padding-top: 80px;">
+        <header class="app-header">
+            <span style="font-weight: 800; letter-spacing: 1px;">SHADOW<span style="color:var(--primary)">BANK</span></span>
+            <i class="fa-solid fa-ghost"></i>
+        </header>
 
-/* ---------- FLOWS ---------- */
-async function firstRun() {
-  app.innerHTML = `
-    <h2>Создайте отпечаток</h2>
-    <button class="primary">Сканировать палец</button>
-  `;
-  app.querySelector("button").onclick = async ()=>{
-    await registerBiometric();
-    pinUI(async p=>{
-      localStorage.setItem("pinHash", await sha(p));
-      dashboard();
-    });
-  };
-}
+        <div class="main-card">
+            <p class="balance-label">Теневой баланс</p>
+            <h1 id="main-balance" class="balance-val">0 ₸</h1>
+            
+            <div style="margin-top: 20px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+                    <span>🚔 УРОВЕНЬ РОЗЫСКА</span>
+                    <span id="risk-txt">0%</span>
+                </div>
+                <div class="risk-bar-bg"><div id="risk-fill" class="risk-fill"></div></div>
+            </div>
+        </div>
 
-function login() {
-  app.innerHTML = `
-    <h2>Вход</h2>
-    <button class="primary">👆 Войти по отпечатку</button>
-    <button class="secondary">Войти по PIN</button>
-  `;
-  app.querySelector(".primary").onclick = async ()=>{
-    try { await biometricLogin(); } catch {}
-  };
-  app.querySelector(".secondary").onclick = ()=>{
-    pinUI(async p=>{
-      if (await sha(p) === localStorage.getItem("pinHash")) dashboard();
-      else alert("Неверный PIN");
-    });
-  };
-}
+        <button class="action-btn" onclick="Game.findVictim()">
+            <i class="fa-solid fa-user-plus"></i> НАЙТИ ЖЕРТВУ
+        </button>
 
-function dashboard() {
-  app.innerHTML = `
-    <h2>🏦 Тестовый банк</h2>
-    <p>Вы успешно вошли</p>
-    <button class="secondary">Выйти</button>
-  `;
-  app.querySelector("button").onclick = login;
-}
+        <p style="margin-top: 30px; font-size: 11px; color: var(--text-sec); text-align: center;">
+            Чем больше сделка, тем выше риск попасться полиции.
+        </p>
+    </div>
 
-/* ---------- START ---------- */
-if (!hasBio() || !hasPin()) firstRun();
-else login();
-</script>
+    <script>
+        // СОСТОЯНИЕ ИГРЫ
+        let STATE = {
+            money: parseInt(localStorage.getItem('sb_money')) || 0,
+            risk: 0,
+            pin: localStorage.getItem('sb_pin') || null,
+            tempPin: '',
+            isLocked: false,
+            attempts: 3
+        };
 
+        // ЛОГИКА ИНТРО
+        const Intro = {
+            accept() {
+                document.getElementById('sms-notification').style.display = 'none';
+                document.getElementById('intro-btns').style.display = 'none';
+                document.getElementById('tutorial').style.display = 'block';
+            },
+            reject() {
+                document.getElementById('intro-screen').innerHTML = `
+                    <h2 style="text-align:center">Ну тогда досвидания.<br>Зря упустил шанс...</h2>
+                    <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:var(--primary); font-weight:800; text-decoration:underline;">Вернуться</button>
+                `;
+            },
+            start() {
+                document.getElementById('intro-screen').classList.remove('active');
+                document.getElementById('pin-screen').classList.add('active');
+                if(STATE.pin) document.getElementById('pin-status').innerText = "Введите код доступа";
+            }
+        };
+
+        // МЕНЕДЖЕР ПИН-КОДА
+        const PinManager = {
+            num(n) {
+                if(STATE.isLocked || STATE.tempPin.length >= 4) return;
+                STATE.tempPin += n;
+                this.renderDots();
+                if(STATE.tempPin.length === 4) this.check();
+            },
+            del() {
+                if(STATE.isLocked) return;
+                STATE.tempPin = STATE.tempPin.slice(0, -1);
+                this.renderDots();
+            },
+            renderDots() {
+                const dots = document.querySelectorAll('.dot');
+                dots.forEach((d, i) => i < STATE.tempPin.length ? d.classList.add('filled') : d.classList.remove('filled'));
+            },
+            check() {
+                setTimeout(() => {
+                    const status = document.getElementById('pin-status');
+                    if(!STATE.pin) {
+                        STATE.pin = STATE.tempPin;
+                        localStorage.setItem('sb_pin', STATE.pin);
+                        this.unlock();
+                    } else if(STATE.tempPin === STATE.pin) {
+                        STATE.attempts = 3;
+                        this.unlock();
+                    } else {
+                        STATE.attempts--;
+                        document.querySelector('.pin-dots').classList.add('shake');
+                        if(STATE.attempts > 0) {
+                            status.innerText = `Неверно! Попыток: ${STATE.attempts}`;
+                            status.classList.add('text-red');
+                        } else {
+                            this.lock(30);
+                        }
+                        setTimeout(() => {
+                            document.querySelector('.pin-dots').classList.remove('shake');
+                            STATE.tempPin = '';
+                            this.renderDots();
+                        }, 400);
+                    }
+                }, 200);
+            },
+            lock(sec) {
+                STATE.isLocked = true;
+                let left = sec;
+                const status = document.getElementById('pin-status');
+                const t = setInterval(() => {
+                    status.innerText = `Блокировка: ${left}с`;
+                    left--;
+                    if(left < 0) {
+                        clearInterval(t);
+                        STATE.isLocked = false;
+                        STATE.attempts = 3;
+                        status.innerText = "Введите код доступа";
+                        status.classList.remove('text-red');
+                    }
+                }, 1000);
+            },
+            unlock() {
+                document.getElementById('pin-screen').classList.remove('active');
+                document.getElementById('app-screen').classList.add('active');
+                Game.updateUI();
+            }
+        };
+
+        // ЛОГИКА ИГРЫ
+        const Game = {
+            findVictim() {
+                const victims = [
+                    { n: "Студент", m: 45000, r: 12, text: "Хочет купить крипту через левый обменник." },
+                    { n: "Пенсионерка", m: 150000, r: 25, text: "Верит в выплаты от государства 300%." },
+                    { n: "Бизнесмен", m: 800000, r: 45, text: "Нужно срочно отмыть деньги от налоговой." }
+                ];
+                const v = victims[Math.floor(Math.random() * victims.length)];
+                
+                if(confirm(`ЖЕРТВА: ${v.n}\n${v.text}\n\nСкамнуть на ${v.m} ₸?\n(+${v.r}% к розыску)`)) {
+                    this.executeScam(v);
+                }
+            },
+            executeScam(v) {
+                STATE.money += v.m;
+                STATE.risk += v.r;
+                localStorage.setItem('sb_money', STATE.money);
+                this.updateUI();
+
+                if(STATE.risk >= 100) {
+                    alert("🚔 ПОЛИЦИЯ! Вас вычислили по IP. Вы арестованы, все счета обнулены!");
+                    localStorage.clear();
+                    location.reload();
+                }
+            },
+            updateUI() {
+                document.getElementById('main-balance').innerText = new Intl.NumberFormat('ru-RU').format(STATE.money) + ' ₸';
+                document.getElementById('risk-txt').innerText = STATE.risk + '%';
+                document.getElementById('risk-fill').style.width = STATE.risk + '%';
+            }
+        };
+    </script>
 </body>
 </html>
