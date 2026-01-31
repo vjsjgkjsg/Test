@@ -3,272 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ShadowBank | Simulator</title>
-    
+    <title>SHADOW PROJECT | INITIALIZATION</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-    
     <style>
         :root {
-            --primary: #007aff;
-            --danger: #ff3b30;
-            --success: #34c759;
-            --bg: #000000;
-            --card: #1c1c1e;
-            --text: #ffffff;
-            --text-sec: #8e8e93;
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #050505;
+            --tg-color: #24A1DE;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Manrope', sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        
+        body { 
+            background: var(--dark-bg); 
+            color: #fff; 
+            height: 100vh; 
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
 
-        .screen { 
-            position: fixed; inset: 0; display: none; 
-            flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; z-index: 10;
+        /* АНИМИРОВАННЫЙ ФОН */
+        .bg-lines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none; z-index: 100;
+        }
+
+        .screen {
+            position: absolute; width: 100%; max-width: 500px; height: 100%;
+            display: none; flex-direction: column; padding: 25px;
+            z-index: 10;
         }
         .screen.active { display: flex; }
 
-        /* ИНТРО И СМС */
-        #sms-notification {
-            width: 100%; max-width: 350px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(15px);
+        /* TELEGRAM STYLING */
+        #tg-notify {
+            background: var(--glass);
+            border: 1px solid rgba(36, 161, 222, 0.3);
             border-radius: 20px; padding: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            animation: slideDown 0.5s ease-out;
+            display: flex; align-items: center; gap: 15px;
+            margin-top: 40px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+            animation: slideIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
-        @keyframes slideDown { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .sms-header { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--text-sec); margin-bottom: 8px; }
-        .sms-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
-        .btn-box { display: flex; gap: 10px; width: 100%; max-width: 350px; margin-top: 25px; }
-        .btn { flex: 1; padding: 15px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; }
-        .btn-blue { background: var(--primary); color: #fff; }
-        .btn-dark { background: #2c2c2e; color: #fff; }
 
-        /* ТУТОРИАЛ */
-        #tutorial { text-align: center; animation: fadeIn 0.5s; }
-        #tutorial h2 { color: var(--primary); margin-bottom: 15px; }
-        #tutorial p { color: var(--text-sec); margin-bottom: 20px; line-height: 1.5; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .chat-area {
+            flex: 1; overflow-y: auto; margin-top: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+            padding-right: 5px;
+        }
 
-        /* ПИН-КОД */
-        .logo-box { width: 70px; height: 70px; background: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; }
-        .pin-dots { display: flex; gap: 15px; margin: 25px 0; }
-        .dot { width: 12px; height: 12px; border: 2px solid var(--text-sec); border-radius: 50%; }
-        .dot.filled { background: var(--text); border-color: var(--text); }
-        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 250px; }
-        .numpad button { height: 60px; border-radius: 50%; border: none; background: #1c1c1e; color: #fff; font-size: 20px; font-weight: 600; }
-        .del-btn { background: transparent !important; color: var(--danger) !important; }
+        .bubble {
+            background: #1e1e1e; padding: 12px 16px;
+            border-radius: 15px 15px 15px 2px;
+            max-width: 85%; font-size: 14px; line-height: 1.4;
+            border: 1px solid #333; opacity: 0;
+            transform: translateY(10px);
+        }
 
-        /* БАНК */
-        .app-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px; position: absolute; top: 0; }
-        .main-card { width: 100%; background: var(--card); border-radius: 25px; padding: 20px; margin-top: 60px; }
-        .balance-label { color: var(--text-sec); font-size: 14px; }
-        .balance-val { font-size: 32px; font-weight: 800; margin: 5px 0; }
-        
-        .risk-bar-bg { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 10px; overflow: hidden; }
-        .risk-fill { width: 0%; height: 100%; background: var(--danger); transition: 0.3s; box-shadow: 0 0 10px var(--danger); }
-        
-        .action-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 16px; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        /* АНИМАЦИЯ ТРЯСКИ */
-        .shake { animation: shake 0.4s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
-        .text-red { color: var(--danger) !important; }
+        .typing { font-style: italic; color: var(--tg-color); font-size: 12px; margin-bottom: 5px; }
+
+        /* AVATAR EDITOR */
+        .avatar-engine {
+            position: relative; width: 180px; height: 180px;
+            margin: 30px auto; border: 2px solid var(--neon-blue);
+            border-radius: 50%; background: #111;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        }
+        .part { position: absolute; transition: 0.3s; }
+        .base { font-size: 100px; }
+        .eyes { font-size: 40px; top: 50px; }
+        .acc { font-size: 30px; top: 30px; right: 30px; }
+
+        .editor-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;
+        }
+
+        /* INPUTS & BUTTONS */
+        .cyber-input {
+            width: 100%; background: transparent; border: 1px solid #444;
+            padding: 15px; color: var(--neon-blue); font-size: 18px;
+            text-align: center; border-radius: 5px; margin-top: 20px;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        .cyber-btn {
+            width: 100%; padding: 20px; margin-top: auto;
+            background: transparent; border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); font-weight: bold; cursor: pointer;
+            position: relative; overflow: hidden; transition: 0.3s;
+            text-transform: uppercase; margin-bottom: 20px;
+        }
+
+        .cyber-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+
+        /* GLITCH ANIMATION */
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .glitch:hover::before { left: 2px; text-shadow: -2px 0 red; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(31px, 9999px, 94px, 0); }
+            100% { clip: rect(62px, 9999px, 12px, 0); }
+        }
+
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
+    <div class="bg-lines"></div>
 
-    <div id="intro-screen" class="screen active">
-        <div id="sms-notification">
-            <div class="sms-header"><div class="sms-dot"></div><span>MESSAGES • СЕЙЧАС</span></div>
-            <b style="display:block; margin-bottom:5px;">Неизвестный номер</b>
-            <p style="font-size: 14px; line-height: 1.4;">Слушай, есть тема... Хочешь поднять кучу денег и стать реально богатым? 💸 Жду ответа.</p>
-        </div>
-        <div class="btn-box" id="intro-btns">
-            <button class="btn btn-dark" onclick="Intro.reject()">Нет...</button>
-            <button class="btn btn-blue" onclick="Intro.accept()">Да!</button>
-        </div>
-        <div id="tutorial" style="display:none;">
-            <h2>ТЫ В ДЕЛЕ</h2>
-            <p>Твоя задача: проворачивать схемы.<br>Скамь "мамонтов", получай кэш.<br>Но если <b>Розыск</b> дойдет до 100% — тебе конец.</p>
-            <button class="btn btn-blue" style="width:100%" onclick="Intro.start()">ПОГНАЛИ</button>
-        </div>
-    </div>
-
-    <div id="pin-screen" class="screen">
-        <div class="logo-box"><i class="fa-solid fa-user-secret"></i></div>
-        <p id="pin-status">Создайте код доступа</p>
-        <div class="pin-dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        </div>
-        <div class="numpad">
-            <button onclick="PinManager.num(1)">1</button><button onclick="PinManager.num(2)">2</button><button onclick="PinManager.num(3)">3</button>
-            <button onclick="PinManager.num(4)">4</button><button onclick="PinManager.num(5)">5</button><button onclick="PinManager.num(6)">6</button>
-            <button onclick="PinManager.num(7)">7</button><button onclick="PinManager.num(8)">8</button><button onclick="PinManager.num(9)">9</button>
-            <button onclick="PinManager.num(0)" style="grid-column: 2;">0</button>
-            <button class="del-btn" onclick="PinManager.del()"><i class="fa-solid fa-delete-left"></i></button>
-        </div>
-    </div>
-
-    <div id="app-screen" class="screen" style="justify-content: flex-start; padding-top: 80px;">
-        <header class="app-header">
-            <span style="font-weight: 800; letter-spacing: 1px;">SHADOW<span style="color:var(--primary)">BANK</span></span>
-            <i class="fa-solid fa-ghost"></i>
-        </header>
-
-        <div class="main-card">
-            <p class="balance-label">Теневой баланс</p>
-            <h1 id="main-balance" class="balance-val">0 ₸</h1>
-            
-            <div style="margin-top: 20px;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
-                    <span>🚔 УРОВЕНЬ РОЗЫСКА</span>
-                    <span id="risk-txt">0%</span>
-                </div>
-                <div class="risk-bar-bg"><div id="risk-fill" class="risk-fill"></div></div>
+    <div id="scr-tg" class="screen active">
+        <div id="tg-notify">
+            <div style="width:45px; height:45px; background:var(--tg-color); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px;">
+                <i class="fa-brands fa-telegram"></i>
+            </div>
+            <div>
+                <p style="color:var(--tg-color); font-weight:bold; font-size:12px;">SYSTEM_BOT</p>
+                <p style="font-size:14px;">Входящий запрос на подключение...</p>
             </div>
         </div>
 
-        <button class="action-btn" onclick="Game.findVictim()">
-            <i class="fa-solid fa-user-plus"></i> НАЙТИ ЖЕРТВУ
-        </button>
+        <div class="chat-area" id="chat">
+            </div>
 
-        <p style="margin-top: 30px; font-size: 11px; color: var(--text-sec); text-align: center;">
-            Чем больше сделка, тем выше риск попасться полиции.
-        </p>
+        <div id="typing-status" class="typing" style="display:none;">System_Bot печатает...</div>
+
+        <button class="cyber-btn" id="start-btn" onclick="Story.startChat()">ПРИНЯТЬ ЗАПРОС</button>
+        <button class="cyber-btn" id="next-btn" style="display:none;" onclick="Story.goToEditor()">ПЕРЕЙТИ К НАСТРОЙКАМ</button>
+    </div>
+
+    <div id="scr-edit" class="screen">
+        <h2 class="glitch" data-text="ИДЕНТИФИКАЦИЯ" style="text-align:center; color:var(--neon-blue);">ИДЕНТИФИКАЦИЯ</h2>
+        
+        <div class="avatar-engine">
+            <div class="part base" id="av-base">👤</div>
+            <div class="part eyes" id="av-eyes"></div>
+            <div class="part acc" id="av-acc"></div>
+        </div>
+
+        <div class="editor-grid">
+            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.set('eyes', ['🕶️','👁️','🔴','❌'])">Глаза</button>
+            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.set('acc', ['🎧','💻','🔥','⚡'])">Декор</button>
+            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.set('base', ['👤','👽','🤖','💀'])">Раса</button>
+            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.color()">Цвет</button>
+        </div>
+
+        <input type="text" id="nick-in" class="cyber-input" placeholder="Введите NICKNAME...">
+        <p id="err" style="color:red; font-size:10px; text-align:center; margin-top:10px; display:none;">ОШИБКА: ОБНАРУЖЕНО РЕАЛЬНОЕ ИМЯ. РИСК ДЕАНОНА!</p>
+
+        <button class="cyber-btn" onclick="Story.finish()">ЗАВЕРШИТЬ СОЗДАНИЕ</button>
     </div>
 
     <script>
-        // СОСТОЯНИЕ ИГРЫ
-        let STATE = {
-            money: parseInt(localStorage.getItem('sb_money')) || 0,
-            risk: 0,
-            pin: localStorage.getItem('sb_pin') || null,
-            tempPin: '',
-            isLocked: false,
-            attempts: 3
-        };
+        const Story = {
+            messages: [
+                "1. Вы будете проходить несколько этапов мошенничества от самого низа до вершины.",
+                "2. НЕ ИСПОЛЬЗОВАТЬ данные схемы во зло! Это учебный процесс, чтобы вы не попались на уловки.",
+                "3. В игре вам придется делать выборы. Они влияют на РЕПУТАЦИЮ и ПОКАЗАТЕЛИ.",
+                "4. Вступай в игру, ты все поймешь по сюжету... Время пошло."
+            ],
 
-        // ЛОГИКА ИНТРО
-        const Intro = {
-            accept() {
-                document.getElementById('sms-notification').style.display = 'none';
-                document.getElementById('intro-btns').style.display = 'none';
-                document.getElementById('tutorial').style.display = 'block';
+            startChat() {
+                document.getElementById('start-btn').style.display = 'none';
+                this.showNextMsg(0);
             },
-            reject() {
-                document.getElementById('intro-screen').innerHTML = `
-                    <h2 style="text-align:center">Ну тогда досвидания.<br>Зря упустил шанс...</h2>
-                    <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:var(--primary); font-weight:800; text-decoration:underline;">Вернуться</button>
-                `;
-            },
-            start() {
-                document.getElementById('intro-screen').classList.remove('active');
-                document.getElementById('pin-screen').classList.add('active');
-                if(STATE.pin) document.getElementById('pin-status').innerText = "Введите код доступа";
-            }
-        };
 
-        // МЕНЕДЖЕР ПИН-КОДА
-        const PinManager = {
-            num(n) {
-                if(STATE.isLocked || STATE.tempPin.length >= 4) return;
-                STATE.tempPin += n;
-                this.renderDots();
-                if(STATE.tempPin.length === 4) this.check();
-            },
-            del() {
-                if(STATE.isLocked) return;
-                STATE.tempPin = STATE.tempPin.slice(0, -1);
-                this.renderDots();
-            },
-            renderDots() {
-                const dots = document.querySelectorAll('.dot');
-                dots.forEach((d, i) => i < STATE.tempPin.length ? d.classList.add('filled') : d.classList.remove('filled'));
-            },
-            check() {
-                setTimeout(() => {
-                    const status = document.getElementById('pin-status');
-                    if(!STATE.pin) {
-                        STATE.pin = STATE.tempPin;
-                        localStorage.setItem('sb_pin', STATE.pin);
-                        this.unlock();
-                    } else if(STATE.tempPin === STATE.pin) {
-                        STATE.attempts = 3;
-                        this.unlock();
-                    } else {
-                        STATE.attempts--;
-                        document.querySelector('.pin-dots').classList.add('shake');
-                        if(STATE.attempts > 0) {
-                            status.innerText = `Неверно! Попыток: ${STATE.attempts}`;
-                            status.classList.add('text-red');
-                        } else {
-                            this.lock(30);
-                        }
+            showNextMsg(idx) {
+                if(idx < this.messages.length) {
+                    document.getElementById('typing-status').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        document.getElementById('typing-status').style.display = 'none';
+                        const m = document.createElement('div');
+                        m.className = 'bubble';
+                        m.innerText = this.messages[idx];
+                        document.getElementById('chat').appendChild(m);
+                        
+                        // Плавное появление
                         setTimeout(() => {
-                            document.querySelector('.pin-dots').classList.remove('shake');
-                            STATE.tempPin = '';
-                            this.renderDots();
-                        }, 400);
-                    }
-                }, 200);
+                            m.style.opacity = '1';
+                            m.style.transform = 'translateY(0)';
+                            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+                        }, 50);
+
+                        this.showNextMsg(idx + 1);
+                    }, 1500);
+                } else {
+                    document.getElementById('next-btn').style.display = 'block';
+                }
             },
-            lock(sec) {
-                STATE.isLocked = true;
-                let left = sec;
-                const status = document.getElementById('pin-status');
-                const t = setInterval(() => {
-                    status.innerText = `Блокировка: ${left}с`;
-                    left--;
-                    if(left < 0) {
-                        clearInterval(t);
-                        STATE.isLocked = false;
-                        STATE.attempts = 3;
-                        status.innerText = "Введите код доступа";
-                        status.classList.remove('text-red');
-                    }
-                }, 1000);
+
+            goToEditor() {
+                document.getElementById('scr-tg').classList.remove('active');
+                document.getElementById('scr-edit').classList.add('active');
             },
-            unlock() {
-                document.getElementById('pin-screen').classList.remove('active');
-                document.getElementById('app-screen').classList.add('active');
-                Game.updateUI();
+
+            finish() {
+                const nick = document.getElementById('nick-in').value.toLowerCase();
+                const forbidden = ['олег','иван','алекс','саша','дима','макс','влад','артем','нурик','ержан'];
+                
+                if(nick.length < 3 || forbidden.some(n => nick.includes(n))) {
+                    document.getElementById('err').style.display = 'block';
+                    document.getElementById('nick-in').style.borderColor = 'red';
+                    return;
+                }
+
+                alert("ПРОФИЛЬ СОЗДАН. ДОБРО ПОЖАЛОВАТЬ В СЕТЬ, " + nick.toUpperCase());
+                window.location.href = 'game.html';
             }
         };
 
-        // ЛОГИКА ИГРЫ
-        const Game = {
-            findVictim() {
-                const victims = [
-                    { n: "Студент", m: 45000, r: 12, text: "Хочет купить крипту через левый обменник." },
-                    { n: "Пенсионерка", m: 150000, r: 25, text: "Верит в выплаты от государства 300%." },
-                    { n: "Бизнесмен", m: 800000, r: 45, text: "Нужно срочно отмыть деньги от налоговой." }
-                ];
-                const v = victims[Math.floor(Math.random() * victims.length)];
-                
-                if(confirm(`ЖЕРТВА: ${v.n}\n${v.text}\n\nСкамнуть на ${v.m} ₸?\n(+${v.r}% к розыску)`)) {
-                    this.executeScam(v);
-                }
+        const Avatar = {
+            set(id, items) {
+                const el = document.getElementById('av-' + id);
+                let current = el.innerText;
+                let next = items[(items.indexOf(current) + 1) % items.length];
+                el.innerText = next;
             },
-            executeScam(v) {
-                STATE.money += v.m;
-                STATE.risk += v.r;
-                localStorage.setItem('sb_money', STATE.money);
-                this.updateUI();
-
-                if(STATE.risk >= 100) {
-                    alert("🚔 ПОЛИЦИЯ! Вас вычислили по IP. Вы арестованы, все счета обнулены!");
-                    localStorage.clear();
-                    location.reload();
-                }
-            },
-            updateUI() {
-                document.getElementById('main-balance').innerText = new Intl.NumberFormat('ru-RU').format(STATE.money) + ' ₸';
-                document.getElementById('risk-txt').innerText = STATE.risk + '%';
-                document.getElementById('risk-fill').style.width = STATE.risk + '%';
+            color() {
+                const colors = ['#00f2ff', '#bc13fe', '#34c759', '#ff3b30'];
+                document.querySelector('.avatar-engine').style.borderColor = colors[Math.floor(Math.random()*colors.length)];
             }
         };
     </script>
