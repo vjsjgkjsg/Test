@@ -2,236 +2,107 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHADOW PROJECT | INITIALIZATION</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --dark-bg: #050505;
-            --tg-color: #24A1DE;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
-        
-        body { 
-            background: var(--dark-bg); 
-            color: #fff; 
-            height: 100vh; 
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* АНИМИРОВАННЫЙ ФОН */
-        .bg-lines {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none; z-index: 100;
-        }
-
-        .screen {
-            position: absolute; width: 100%; max-width: 500px; height: 100%;
-            display: none; flex-direction: column; padding: 25px;
-            z-index: 10;
-        }
-        .screen.active { display: flex; }
-
-        /* TELEGRAM STYLING */
-        #tg-notify {
-            background: var(--glass);
-            border: 1px solid rgba(36, 161, 222, 0.3);
-            border-radius: 20px; padding: 15px;
-            display: flex; align-items: center; gap: 15px;
-            margin-top: 40px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
-            animation: slideIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-
-        .chat-area {
-            flex: 1; overflow-y: auto; margin-top: 20px;
-            display: flex; flex-direction: column; gap: 12px;
-            padding-right: 5px;
-        }
-
-        .bubble {
-            background: #1e1e1e; padding: 12px 16px;
-            border-radius: 15px 15px 15px 2px;
-            max-width: 85%; font-size: 14px; line-height: 1.4;
-            border: 1px solid #333; opacity: 0;
-            transform: translateY(10px);
-        }
-
-        .typing { font-style: italic; color: var(--tg-color); font-size: 12px; margin-bottom: 5px; }
-
-        /* AVATAR EDITOR */
-        .avatar-engine {
-            position: relative; width: 180px; height: 180px;
-            margin: 30px auto; border: 2px solid var(--neon-blue);
-            border-radius: 50%; background: #111;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
-        }
-        .part { position: absolute; transition: 0.3s; }
-        .base { font-size: 100px; }
-        .eyes { font-size: 40px; top: 50px; }
-        .acc { font-size: 30px; top: 30px; right: 30px; }
-
-        .editor-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;
-        }
-
-        /* INPUTS & BUTTONS */
-        .cyber-input {
-            width: 100%; background: transparent; border: 1px solid #444;
-            padding: 15px; color: var(--neon-blue); font-size: 18px;
-            text-align: center; border-radius: 5px; margin-top: 20px;
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-
-        .cyber-btn {
-            width: 100%; padding: 20px; margin-top: auto;
-            background: transparent; border: 1px solid var(--neon-blue);
-            color: var(--neon-blue); font-weight: bold; cursor: pointer;
-            position: relative; overflow: hidden; transition: 0.3s;
-            text-transform: uppercase; margin-bottom: 20px;
-        }
-
-        .cyber-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
-
-        /* GLITCH ANIMATION */
-        .glitch { position: relative; }
-        .glitch::before, .glitch::after {
-            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        }
-        .glitch:hover::before { left: 2px; text-shadow: -2px 0 red; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
-
-        @keyframes glitch-anim {
-            0% { clip: rect(31px, 9999px, 94px, 0); }
-            100% { clip: rect(62px, 9999px, 12px, 0); }
-        }
-
-        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DROP: KAZAKHSTAN STORY</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="bg-lines"></div>
 
-    <div id="scr-tg" class="screen active">
-        <div id="tg-notify">
-            <div style="width:45px; height:45px; background:var(--tg-color); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px;">
-                <i class="fa-brands fa-telegram"></i>
-            </div>
-            <div>
-                <p style="color:var(--tg-color); font-weight:bold; font-size:12px;">SYSTEM_BOT</p>
-                <p style="font-size:14px;">Входящий запрос на подключение...</p>
+    <div class="phone-frame">
+        <div class="status-bar">
+            <span id="clock">14:02</span>
+            <div class="icons">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-half"></i>
             </div>
         </div>
 
-        <div class="chat-area" id="chat">
-            </div>
+        <div id="notification-area"></div>
 
-        <div id="typing-status" class="typing" style="display:none;">System_Bot печатает...</div>
-
-        <button class="cyber-btn" id="start-btn" onclick="Story.startChat()">ПРИНЯТЬ ЗАПРОС</button>
-        <button class="cyber-btn" id="next-btn" style="display:none;" onclick="Story.goToEditor()">ПЕРЕЙТИ К НАСТРОЙКАМ</button>
-    </div>
-
-    <div id="scr-edit" class="screen">
-        <h2 class="glitch" data-text="ИДЕНТИФИКАЦИЯ" style="text-align:center; color:var(--neon-blue);">ИДЕНТИФИКАЦИЯ</h2>
-        
-        <div class="avatar-engine">
-            <div class="part base" id="av-base">👤</div>
-            <div class="part eyes" id="av-eyes"></div>
-            <div class="part acc" id="av-acc"></div>
-        </div>
-
-        <div class="editor-grid">
-            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.set('eyes', ['🕶️','👁️','🔴','❌'])">Глаза</button>
-            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.set('acc', ['🎧','💻','🔥','⚡'])">Декор</button>
-            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.set('base', ['👤','👽','🤖','💀'])">Раса</button>
-            <button class="cyber-btn" style="padding:10px; font-size:10px;" onclick="Avatar.color()">Цвет</button>
-        </div>
-
-        <input type="text" id="nick-in" class="cyber-input" placeholder="Введите NICKNAME...">
-        <p id="err" style="color:red; font-size:10px; text-align:center; margin-top:10px; display:none;">ОШИБКА: ОБНАРУЖЕНО РЕАЛЬНОЕ ИМЯ. РИСК ДЕАНОНА!</p>
-
-        <button class="cyber-btn" onclick="Story.finish()">ЗАВЕРШИТЬ СОЗДАНИЕ</button>
-    </div>
-
-    <script>
-        const Story = {
-            messages: [
-                "1. Вы будете проходить несколько этапов мошенничества от самого низа до вершины.",
-                "2. НЕ ИСПОЛЬЗОВАТЬ данные схемы во зло! Это учебный процесс, чтобы вы не попались на уловки.",
-                "3. В игре вам придется делать выборы. Они влияют на РЕПУТАЦИЮ и ПОКАЗАТЕЛИ.",
-                "4. Вступай в игру, ты все поймешь по сюжету... Время пошло."
-            ],
-
-            startChat() {
-                document.getElementById('start-btn').style.display = 'none';
-                this.showNextMsg(0);
-            },
-
-            showNextMsg(idx) {
-                if(idx < this.messages.length) {
-                    document.getElementById('typing-status').style.display = 'block';
-                    
-                    setTimeout(() => {
-                        document.getElementById('typing-status').style.display = 'none';
-                        const m = document.createElement('div');
-                        m.className = 'bubble';
-                        m.innerText = this.messages[idx];
-                        document.getElementById('chat').appendChild(m);
-                        
-                        // Плавное появление
-                        setTimeout(() => {
-                            m.style.opacity = '1';
-                            m.style.transform = 'translateY(0)';
-                            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-                        }, 50);
-
-                        this.showNextMsg(idx + 1);
-                    }, 1500);
-                } else {
-                    document.getElementById('next-btn').style.display = 'block';
-                }
-            },
-
-            goToEditor() {
-                document.getElementById('scr-tg').classList.remove('active');
-                document.getElementById('scr-edit').classList.add('active');
-            },
-
-            finish() {
-                const nick = document.getElementById('nick-in').value.toLowerCase();
-                const forbidden = ['олег','иван','алекс','саша','дима','макс','влад','артем','нурик','ержан'];
+        <div id="app-screen" class="app-screen home-view">
+            
+            <div id="home-screen-content">
+                <div class="widget-weather">
+                    <h3>Алматы</h3>
+                    <span>+24°C, Ясно</span>
+                </div>
                 
-                if(nick.length < 3 || forbidden.some(n => nick.includes(n))) {
-                    document.getElementById('err').style.display = 'block';
-                    document.getElementById('nick-in').style.borderColor = 'red';
-                    return;
-                }
+                <div class="app-grid">
+                    <div class="app-icon" onclick="game.openApp('chat')">
+                        <div class="icon chat-icon"><i class="fas fa-paper-plane"></i></div>
+                        <span>M-Chat</span>
+                        <div id="badge-chat" class="badge hidden">0</div>
+                    </div>
+                    <div class="app-icon" onclick="game.openApp('bank')">
+                        <div class="icon bank-icon">K</div>
+                        <span>K-Bank</span>
+                    </div>
+                    <div class="app-icon" onclick="game.openApp('news')">
+                        <div class="icon news-icon"><i class="far fa-newspaper"></i></div>
+                        <span>News</span>
+                    </div>
+                    <div class="app-icon" onclick="game.openApp('settings')">
+                        <div class="icon settings-icon"><i class="fas fa-cog"></i></div>
+                        <span>Настройки</span>
+                    </div>
+                </div>
+            </div>
 
-                alert("ПРОФИЛЬ СОЗДАН. ДОБРО ПОЖАЛОВАТЬ В СЕТЬ, " + nick.toUpperCase());
-                window.location.href = 'game.html';
-            }
-        };
+            <div id="app-chat" class="app-window hidden">
+                <div class="app-header chat-header">
+                    <button onclick="game.goHome()"><i class="fas fa-arrow-left"></i></button>
+                    <span id="chat-contact-name">Неизвестный</span>
+                </div>
+                <div id="chat-history" class="chat-body"></div>
+                <div id="chat-input-area" class="chat-controls"></div>
+            </div>
 
-        const Avatar = {
-            set(id, items) {
-                const el = document.getElementById('av-' + id);
-                let current = el.innerText;
-                let next = items[(items.indexOf(current) + 1) % items.length];
-                el.innerText = next;
-            },
-            color() {
-                const colors = ['#00f2ff', '#bc13fe', '#34c759', '#ff3b30'];
-                document.querySelector('.avatar-engine').style.borderColor = colors[Math.floor(Math.random()*colors.length)];
-            }
-        };
-    </script>
+            <div id="app-bank" class="app-window hidden">
+                <div class="bank-home">
+                    <div class="bank-header">
+                        <button onclick="game.goHome()" class="back-btn-white"><i class="fas fa-arrow-left"></i></button>
+                        <h2>K-Bank</h2>
+                    </div>
+                    <div class="card-display">
+                        <div class="card-balance">
+                            <span class="label">Мой счет</span>
+                            <span id="bank-balance-display">0 ₸</span>
+                        </div>
+                        <div class="card-number">**** **** **** 4291</div>
+                    </div>
+                    <div class="bank-actions">
+                        <button class="bank-btn disabled"><i class="fas fa-exchange-alt"></i> Перевод</button>
+                        <button class="bank-btn disabled"><i class="fas fa-qrcode"></i> QR</button>
+                    </div>
+                    <div class="transaction-history">
+                        <h4>История</h4>
+                        <ul id="bank-history-list">
+                            </ul>
+                    </div>
+                    <div id="bank-overlay" class="bank-overlay hidden"></div>
+                </div>
+            </div>
+
+            <div id="app-news" class="app-window hidden">
+                <div class="app-header news-header">
+                    <button onclick="game.goHome()"><i class="fas fa-arrow-left"></i></button>
+                    <span>Новости КЗ</span>
+                </div>
+                <div id="news-feed" class="news-body"></div>
+            </div>
+
+        </div>
+
+        <div class="home-indicator" onclick="game.goHome()"></div>
+    </div>
+
+    <div class="debug-stats">
+        <div>Риск: <span id="risk-stat">0</span>%</div>
+        <div>Совесть: <span id="conscience-stat">50</span></div>
+    </div>
+
+    <script src="game.js"></script>
 </body>
 </html>
